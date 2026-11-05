@@ -68,4 +68,129 @@ nmap -sS -p 135,139,445 10.204.62.26
 
 The scan identified the following open ports:
 
-- **135/tcp:** Microsoft
+- **135/tcp:** Microsoft RPC
+- **139/tcp:** NetBIOS Session Service
+- **445/tcp:** Microsoft-DS
+
+A SYN scan helps identify port states by examining TCP responses without completing a full TCP connection.
+
+## 7. Service Version Detection
+
+To identify the services associated with the open ports, I used Nmap service detection:
+
+```bash
+nmap -sV -p 135,139,445 10.204.62.26 -oN service_detection.txt
+```
+
+### Observations
+
+| Port | Service Identified |
+|---|---|
+| 135/tcp | Microsoft Windows RPC |
+| 139/tcp | Microsoft NetBIOS-SSN |
+| 445/tcp | Microsoft-DS |
+
+The output also indicated a Windows operating system family.
+
+The scan results were saved in `service_detection.txt`.
+
+## 8. Wireshark Packet Analysis
+
+I used Wireshark to capture and analyse network packets generated during a local Nmap scan.
+
+For this experiment, I selected the loopback capture adapter and executed:
+
+```bash
+nmap -sS -p 135,139,445 127.0.0.1
+```
+
+I observed different TCP packet types during the scan.
+
+### A. SYN Packets
+
+SYN packets are sent by the scanner to initiate TCP communication and check the status of target ports.
+
+Display filter:
+
+```text
+tcp.flags.syn == 1 && tcp.flags.ack == 0
+```
+
+### B. SYN-ACK Packets
+
+SYN-ACK packets indicate that a TCP connection request has received a response from a listening port.
+
+Display filter:
+
+```text
+tcp.flags.syn == 1 && tcp.flags.ack == 1
+```
+
+### C. RST Packets
+
+RST packets are used to reset or terminate TCP communication.
+
+During a SYN scan, Nmap may send RST packets to avoid completing the normal TCP handshake.
+
+Display filter:
+
+```text
+tcp.flags.reset == 1
+```
+
+The captured packets helped me understand how TCP communication works during port scanning.
+
+## 9. Security Observations
+
+- Open ports indicate services listening for network communication.
+- Ports 135, 139, and 445 are associated with Windows networking functionality.
+- Unnecessary exposed services can increase the attack surface.
+- Open ports do not automatically indicate vulnerabilities.
+- Network services should be configured according to security requirements.
+
+## 10. Practical Challenges
+
+During this experiment, I encountered a few practical challenges:
+
+- Understanding the difference between host discovery and port scanning.
+- Interpreting Nmap output and identifying open ports.
+- Selecting the correct network interface in Wireshark.
+- Understanding the purpose of SYN, SYN-ACK, and RST packets.
+- Saving scan results in the correct directory.
+
+Working through these challenges improved my understanding of network reconnaissance and packet analysis.
+
+## 11. Project Files
+
+```text
+Local_Network_Port_Scan/
+│
+├── README.md
+├── service_detection.txt
+├── screenshots/
+│   ├── nmap-version.png
+│   ├── ipconfig.png
+│   ├── port-scan.png
+│   ├── service-detection.png
+│   ├── syn-packets.png
+│   ├── syn-ack-packets.png
+│   └── rst-packets.png
+│
+└── scan-results/
+```
+
+*Note: The screenshots and folders listed above should be added to the repository as evidence.*
+
+## 12. Conclusion
+
+This project provided practical experience with network reconnaissance, TCP SYN scanning, service detection, and packet analysis.
+
+By using Nmap and Wireshark, I learned how to identify open ports, understand the services associated with them, and observe TCP packet behaviour.
+
+This exercise strengthened my understanding of basic network security concepts and provided a foundation for further learning in cybersecurity.
+
+---
+
+**Project Type:** Practical Cybersecurity Task  
+**Tools:** Nmap, Wireshark, Windows  
+**Focus:** Network Reconnaissance and Port Scanning
