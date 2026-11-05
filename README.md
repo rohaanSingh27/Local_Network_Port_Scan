@@ -179,7 +179,6 @@ Local_Network_Port_Scan/
 └── scan-results/
 ```
 
-*Note: The screenshots and folders listed above should be added to the repository as evidence.*
 
 ## 12. Conclusion
 
