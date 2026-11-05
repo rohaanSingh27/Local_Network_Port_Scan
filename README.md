@@ -160,36 +160,55 @@ During this experiment, I encountered a few practical challenges:
 
 Working through these challenges improved my understanding of network reconnaissance and packet analysis.
 
-## 11. Project Files
+## 11. Project Evidence
+
+The following screenshots document the practical work performed during this project.
+
+### A. Network Configuration and Nmap
+
+- [Nmap Version](screenshots/nmap_version.png)
+- [Network Configuration – ipconfig](screenshots/ipconfig.png)
+- [Subnet and Host Scan](screenshots/port-scan.png)
+- [Service Detection Output Screenshot](screenshots/service_detection.png)
+
+### B. Wireshark Packet Analysis
+
+- [TCP SYN Packets](screenshots/syn-packets.png)
+- [TCP SYN-ACK Packets](screenshots/syn-ack-packet.png)
+- [TCP RST Packets](screenshots/rst-packets.png)
+
+### C. Nmap Scan Results
+
+- [Service Detection Output – TXT File](scan-results/service_detection.txt)
+
+## 12. Project Files
 
 ```text
 Local_Network_Port_Scan/
 │
 ├── README.md
-├── service_detection.txt
+│
 ├── screenshots/
-│   ├── nmap-version.png
+│   ├── nmap_version.png
 │   ├── ipconfig.png
 │   ├── port-scan.png
-│   ├── service-detection.png
+│   ├── service_detection.png
 │   ├── syn-packets.png
-│   ├── syn-ack-packets.png
+│   ├── syn-ack-packet.png
 │   └── rst-packets.png
 │
 └── scan-results/
+    ├── .gitkeep
+    └── service_detection.txt
 ```
 
-
-## 12. Conclusion
+## 13. Conclusion
 
 This project provided practical experience with network reconnaissance, TCP SYN scanning, service detection, and packet analysis.
 
 By using Nmap and Wireshark, I learned how to identify open ports, understand the services associated with them, and observe TCP packet behaviour.
 
 This exercise strengthened my understanding of basic network security concepts and provided a foundation for further learning in cybersecurity.
-
----
-
 **Project Type:** Practical Cybersecurity Task  
 **Tools:** Nmap, Wireshark, Windows  
 **Focus:** Network Reconnaissance and Port Scanning
