@@ -1,242 +1,71 @@
 # Local Network Port Scanning & Network Reconnaissance
 
-**Cyber Security Internship – Task 1**
+## 1. Project Overview
 
-## About the Project
+This project focuses on performing basic network reconnaissance and port scanning on my local network using Nmap and Wireshark.
 
-For this task, I explored how devices and open ports can be identified on a local network using Nmap. I also used Wireshark to observe the TCP packets generated during the scanning process.
+The objective was to understand how devices communicate over a network, identify open TCP ports, detect running services, and observe TCP packet behaviour during a port scan.
 
-The main idea was to understand what is happening behind a port scan instead of just running commands and looking at the output.
+All scanning activities were performed on my own laptop and local network for educational purposes.
 
-I performed the practical using my Windows laptop connected to my mobile hotspot.
+## 2. Tools Used
 
-## Tools Used
+- **Nmap 7.98** – Network discovery and port scanning.
+- **Wireshark 4.6.9** – Network traffic capture and packet analysis.
+- **Windows Command Prompt** – Executing network commands.
 
-- **Nmap 7.98** – To discover hosts, scan ports and identify services.
-- **Wireshark 4.6.9** – To capture and inspect network packets.
-- **Windows Command Prompt** – To execute Nmap commands.
-- **Windows PowerShell** – To check network configuration.
+## 3. Objectives
 
-## What I Wanted to Learn
+- Understand local network configuration.
+- Identify active hosts on the local subnet.
+- Perform TCP SYN port scanning.
+- Detect services running on open ports.
+- Analyse TCP communication using Wireshark.
+- Understand SYN, SYN-ACK, and RST packets.
 
-- How to find my local IP address and network range.
-- How Nmap discovers active devices.
-- How to identify open and closed TCP ports.
-- What a TCP SYN scan actually does.
-- How to identify services running on open ports.
-- How to observe TCP packets using Wireshark.
-- What security issues can arise from unnecessarily exposed services.
+## 4. Network Configuration
 
-## 1. Checking Network Configuration
-
-I started by running the following command:
-
-```cmd
-ipconfig
-```
-
-This helped me identify the active Wi-Fi adapter, IPv4 address, subnet mask and default gateway.
-
-My network configuration at the time of the initial check was:
+I used the Windows `ipconfig` command to identify my network configuration.
 
 | Parameter | Value |
 |---|---|
-| Network interface | Wi-Fi |
-| IPv4 address | 10.204.62.226 |
-| Subnet mask | 255.255.255.0 |
-| Default gateway | 10.204.62.150 |
-| Network range | 10.204.62.0/24 |
+| Network Interface | Wi-Fi |
+| IPv4 Address | 10.204.62.26 |
+| Subnet Mask | 255.255.255.0 |
+| Default Gateway | 10.204.62.150 |
+| Network Range | 10.204.62.0/24 |
 
-The laptop was later assigned a different IP address through DHCP, so I checked the configuration again before performing the device-specific scan.
+The initial and final network configuration screenshots both showed the same IPv4 address: `10.204.62.26`.
 
-*Note: Private IP addresses are shown here for demonstration. They have been redacted in the public evidence where necessary.*
+## 5. Host Discovery and Network Scanning
 
-## 2. Host Discovery
-
-After identifying the network range, I used Nmap to check which hosts were responding.
-
-Command:
+I performed a TCP SYN scan on the local subnet using:
 
 ```bash
 nmap -sS 10.204.62.0/24
 ```
 
-The network scan reported two active hosts.
+The scan reported two active hosts.
 
-This helped me understand how host discovery works before moving on to individual port scans.
+### Observed Results
 
-## 3. TCP SYN Port Scanning
+| IP Address | Open Port | Service |
+|---|---|---|
+| 10.204.62.150 | 53/tcp | DNS |
+| 10.204.62.26 | 135/tcp | MSRPC |
+| 10.204.62.26 | 139/tcp | NetBIOS-SSN |
+| 10.204.62.26 | 445/tcp | Microsoft-DS |
 
-Next, I performed a TCP SYN scan using Nmap.
+**Important observation:** The IP address `10.204.62.26` belonged to my own laptop, as confirmed by the Windows `ipconfig` output. Therefore, these ports were observed on my laptop and not identified as a separate device.
 
-Command:
+## 6. TCP SYN Port Scanning
+
+To examine the selected ports on my laptop, I executed:
 
 ```bash
-nmap -sS 10.204.62.0/24
+nmap -sS -p 135,139,445 10.204.62.26
 ```
 
-The scan identified open ports on the responding devices.
+The scan identified the following open ports:
 
-During further investigation, I confirmed that the following ports were open on my Windows laptop:
-
-| Port | Service | State |
-|---|---|---|
-| 135/tcp | MSRPC | Open |
-| 139/tcp | NetBIOS-SSN | Open |
-| 445/tcp | Microsoft-DS / SMB | Open |
-
-I also observed TCP port 53 (DNS) on the network gateway.
-
-## 4. Understanding the Open Ports
-
-While analysing the results, I looked into what each service is used for.
-
-**Port 135 – MSRPC**
-
-This port is associated with Microsoft Remote Procedure Call. Windows uses RPC for communication between different system components and services.
-
-**Port 139 – NetBIOS-SSN**
-
-This port is associated with NetBIOS Session Service and is used for legacy Windows network communication.
-
-**Port 445 – SMB**
-
-SMB stands for Server Message Block. It is commonly used for file and printer sharing between Windows devices.
-
-Finding these ports open does not automatically mean that the system is vulnerable. Their security depends on how the services are configured and who can access them.
-
-## 5. Service Version Detection
-
-To get more information about the services, I used Nmap's service detection feature.
-
-Command:
-
-```bash
-nmap -sV -p 135,139,445 10.204.62.26 -oN service_detection.txt
-```
-
-Nmap identified:
-
-- Microsoft Windows RPC on port 135.
-- Microsoft Windows NetBIOS-SSN on port 139.
-- Microsoft-DS on port 445.
-- Windows as the operating system family.
-
-The scan results were saved in `service_detection.txt` for documentation.
-
-
-## 6. Wireshark Packet Analysis
-
-After completing the Nmap scans, I opened Wireshark and selected the loopback capture interface to observe traffic generated by a scan against my own laptop.
-
-I used the following display filters:
-
-**Initial SYN packets**
-
-```text
-tcp.flags.syn == 1 && tcp.flags.ack == 0
-```
-
-**SYN-ACK responses**
-
-```text
-tcp.flags.syn == 1 && tcp.flags.ack == 1
-```
-
-**RST packets**
-
-```text
-tcp.flags.reset == 1
-```
-
-During the capture, I observed:
-
-- SYN packets sent towards ports 135, 139 and 445.
-- SYN-ACK responses from ports 135 and 445.
-- RST packets generated during the scan sequence.
-
-This was useful because I could actually see how TCP communication works instead of relying only on Nmap's final output.
-
-## 7. Security Observations
-
-Based on the services identified, I noted a few things that should be considered during a basic network security assessment.
-
-| Port | Observation | Recommendation |
-|---|---|---|
-| 135 | RPC service is accessible | Restrict unnecessary remote access |
-| 139 | Legacy NetBIOS service is accessible | Disable if not required |
-| 445 | SMB service is accessible | Allow access only from trusted devices |
-
-Some basic security practices I learned:
-
-- Disable services that are not needed.
-- Keep Windows and network services updated.
-- Use firewall rules to control incoming connections.
-- Restrict file sharing to trusted devices.
-- Avoid exposing SMB services to untrusted networks.
-
-I did not disable any services or change firewall settings during this task.
-
-## 8. What I Learned
-
-This practical helped me understand several networking concepts in a much better way.
-
-- How IP addresses and subnet masks work.
-- How to identify active hosts using Nmap.
-- How TCP SYN scanning works.
-- How to identify open ports and their associated services.
-- How to read Nmap service detection results.
-- How to capture and filter TCP packets in Wireshark.
-- How SYN, SYN-ACK and RST packets are involved in TCP communication.
-
-One thing I found particularly interesting was observing the SYN and SYN-ACK packets directly in Wireshark after performing the Nmap scan.
-
-## Practical Challenges
-
-During the practical, I faced a few issues while performing the scans.
-
-- Initially, Nmap could not detect my laptop through host discovery. I checked the issue using the `-Pn` option and later continued with a subnet scan.
-- I faced an access-denied error while saving scan results. I resolved it by changing the working directory to Downloads.
-- My laptop received a different IP address through DHCP, so I checked the network configuration again before continuing.
-- I used Wireshark's loopback interface to capture and analyse TCP packets generated by a scan against my own laptop.
-
-These issues helped me understand some common problems that can occur during practical network analysis.
-
-## 9. Project Files
-
-```text
-Local_Network_Port_Scan/
-│
-├── README.md
-│
-├── scan-results/
-│   ├── service_detection.txt
-│   └── network_scan.txt
-│
-├── screenshots/
-│   ├── nmap-version.png
-│   ├── ipconfig.png
-│   ├── port-scan.png
-│   ├── service-detection.png
-│   ├── syn-packets.png
-│   ├── syn-ack-packets.png
-│   └── rst-packets.png
-│
-└── report/
-    └── security-findings.md
-```
-
-## 10. Conclusion
-
-This task gave me my first practical experience with network reconnaissance and port scanning.
-
-I learned how to use Nmap to identify open ports and services, and how Wireshark can be used to understand the packets involved in a TCP connection.
-
-It also helped me understand why identifying open ports is only the first step. The next important part is analysing whether the exposed services are actually necessary and properly secured.
-
----
-
-**Internship:** Cyber Security Internship  
-**Task:** 01 – Local Network Port Scanning  
-**Tools:** Nmap and Wireshark  
-**Platform:** Windows
+- **135/tcp:** Microsoft
